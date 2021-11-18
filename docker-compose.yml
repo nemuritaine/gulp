@@ -1,0 +1,52 @@
+version: '2'
+
+services:
+
+  phpmyadmin:
+    depends_on:
+      - mysql # mysqlのコンテナが起動し終わってから起動するように
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      - PMA_HOSTS=mysql
+      # ユーザー名とパスワードを指定すると、入力しなくて済むようになる。べんり。
+      - PMA_USER=wordpress
+      - PMA_PASSWORD=wordpress
+      - TZ=Asia/Tokyo #ログ用のタイムゾーン
+    restart: always # Docker起動時にコンテナも自動起動
+    ports:
+      - "8888:80" # PC側ポート:DockerのLinux側ポート
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: always # Docker起動時にコンテナも自動起動
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+
+  wordpress: # ApacheとPHPも自動でインストール
+    depends_on:
+      - mysql
+    container_name: wordpress
+    image: wordpress:latest
+    working_dir: /var/www/html/wordpress/ # WPインストールディレクトリがルートと違う場合
+    ports:
+      - "8080:80" # PC側ポート:DockerのLinux側ポート
+    restart: always # Docker起動時にコンテナも自動起動
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DEBUG: "true"
+    volumes:
+      - ./wordpress/wp-content:/var/www/html/wordpress/wp-content
+      # - ./config/php.ini:/usr/local/etc/php/conf.d/php.ini
+
+volumes:
+  mysql_data:
