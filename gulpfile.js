@@ -27,7 +27,7 @@ const path = require('path'),
     webpackStream = require("webpack-stream"),
     webpackConfig = require("./webpack.config.js");
 
-const Name = '',
+const Name = 'noveltyinc.co.jp',
     develop = {
         'root': './wordpress/wp-content/themes/' + Name + '/src/'
     },
